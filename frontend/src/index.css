@@ -1,0 +1,10 @@
+@import 'tailwindcss';
+
+@source '../node_modules/rizzui/dist';
+
+@plugin '@tailwindcss/forms';
+
+:root {
+  --background: oklch(100% 0 0);
+  --foreground: oklch(20% 0 0);
+}

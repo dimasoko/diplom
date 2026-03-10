@@ -1,0 +1,21 @@
+# Зависимости
+node_modules/
+**/node_modules/
+
+# Сборка
+dist/
+build/
+
+# Секреты — никогда не коммить!
+.env
+**/.env
+.env.*
+
+# Prisma
+**/prisma/migrations/
+
+# Системное
+.DS_Store
+Thumbs.db
+.vscode/
+*.local
