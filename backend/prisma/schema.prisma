@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -11,4 +5,234 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+enum UserRole {
+  GUEST
+  CLIENT
+  STAFF
+  ADMIN
+}
+
+enum AddonType {
+  MILK
+  SYRUP
+  EXTRA
+}
+
+enum OrderStatus {
+  PENDING
+  ACCEPTED
+  BREWING
+  READY
+  ISSUED
+  CANCELLED
+}
+
+enum OrderItemSize {
+  S
+  M
+  L
+}
+
+enum BonusTransactionType {
+  EARN
+  SPEND
+  REFUND
+}
+
+model User {
+  id                 String             @id @default(uuid()) @db.Uuid
+  name               String
+  phone              String             @unique
+  password_hash      String
+  role               UserRole           @default(CLIENT)
+  bonus_balance      Int                @default(0)
+  created_at         DateTime           @default(now())
+  deleted_at         DateTime?
+  refresh_tokens     RefreshToken[]
+  push_subscriptions PushSubscription[]
+  orders             Order[]
+  bonus_transactions BonusTransaction[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id         String    @id @default(uuid()) @db.Uuid
+  user_id    String    @db.Uuid
+  token_hash String    @unique
+  expires_at DateTime
+  revoked_at DateTime?
+  user       User      @relation(fields: [user_id], references: [id])
+
+  @@map("refresh_tokens")
+}
+
+model PushSubscription {
+  id         String   @id @default(uuid()) @db.Uuid
+  user_id    String   @db.Uuid
+  endpoint   String   @unique
+  p256dh     String
+  auth       String
+  created_at DateTime @default(now())
+  user       User     @relation(fields: [user_id], references: [id])
+
+  @@map("push_subscriptions")
+}
+
+model PushNotificationLog {
+  id            String   @id @default(uuid()) @db.Uuid
+  title         String
+  body          String
+  target        String
+  sent_count    Int      @default(0)
+  failed_count  Int      @default(0)
+  created_by_id String?  @db.Uuid
+  created_at    DateTime @default(now())
+
+  @@index([created_at])
+  @@map("push_notification_logs")
+}
+
+model Category {
+  id         String     @id @default(uuid()) @db.Uuid
+  name       String
+  slug       String     @unique
+  menu_items MenuItem[]
+
+  @@map("categories")
+}
+
+model MenuItem {
+  id             String      @id @default(uuid()) @db.Uuid
+  category_id    String      @db.Uuid
+  name           String
+  description    String?
+  price_s        Int?
+  price_m        Int?
+  price_l        Int?
+  photo_url      String?
+  is_seasonal    Boolean     @default(false)
+  is_popular     Boolean     @default(false)
+  deleted_at     DateTime?
+  category       Category    @relation(fields: [category_id], references: [id])
+  order_items    OrderItem[]
+
+  @@map("menu_items")
+}
+
+model Addon {
+  id                String           @id @default(uuid()) @db.Uuid
+  name              String
+  type              AddonType
+  price             Int
+  deleted_at        DateTime?
+  order_item_addons OrderItemAddon[]
+
+  @@map("addons")
+}
+
+model Event {
+  id           String   @id @default(uuid()) @db.Uuid
+  title        String
+  description  String?
+  event_date   DateTime
+  published_at DateTime @default(now())
+  photo_url    String?
+  is_published Boolean  @default(false)
+
+  @@map("events")
+}
+
+model Barista {
+  id         String  @id @default(uuid()) @db.Uuid
+  name       String
+  role_title String
+  fun_fact   String?
+  photo_url  String?
+  hover_color String?
+
+  @@map("baristas")
+}
+
+model Gallery {
+  id         String    @id @default(uuid()) @db.Uuid
+  title      String?
+  image_url  String
+  sort_order Int       @default(0)
+  is_active  Boolean   @default(true)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  @@map("gallery")
+}
+
+model Order {
+  id                 String             @id @default(uuid()) @db.Uuid
+  user_id            String             @db.Uuid
+  status             OrderStatus        @default(PENDING)
+  total_price        Int
+  bonus_used         Int                @default(0)
+  bonus_earned       Int                @default(0)
+  pickup_time        DateTime
+  created_at         DateTime           @default(now())
+  user               User               @relation(fields: [user_id], references: [id])
+  order_items        OrderItem[]
+  bonus_transactions BonusTransaction[]
+
+  @@index([status, created_at])
+  @@index([created_at])
+  @@map("orders")
+}
+
+model OrderItem {
+  id                    String           @id @default(uuid()) @db.Uuid
+  order_id              String           @db.Uuid
+  menu_item_id          String           @db.Uuid
+  size                  OrderItemSize
+  quantity              Int
+  calculated_item_price Int
+  order                 Order            @relation(fields: [order_id], references: [id])
+  menu_item             MenuItem         @relation(fields: [menu_item_id], references: [id])
+  order_item_addons     OrderItemAddon[]
+
+  @@map("order_items")
+}
+
+model OrderItemAddon {
+  id                     String    @id @default(uuid()) @db.Uuid
+  order_item_id          String    @db.Uuid
+  addon_id               String    @db.Uuid
+  calculated_addon_price Int
+  order_item             OrderItem @relation(fields: [order_item_id], references: [id])
+  addon                  Addon     @relation(fields: [addon_id], references: [id])
+
+  @@map("order_item_addons")
+}
+
+model BonusTransaction {
+  id         String               @id @default(uuid()) @db.Uuid
+  user_id    String               @db.Uuid
+  order_id   String?              @db.Uuid
+  type       BonusTransactionType
+  amount     Int
+  reason     String
+  created_at DateTime             @default(now())
+  user       User                 @relation(fields: [user_id], references: [id])
+  order      Order?               @relation(fields: [order_id], references: [id])
+
+  @@map("bonus_transactions")
+}
+
+model ContactRequest {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String
+  phone        String
+  message      String
+  is_processed Boolean  @default(false)
+  created_at   DateTime @default(now())
+
+  @@map("contact_requests")
 }

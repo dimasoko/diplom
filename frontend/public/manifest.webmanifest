@@ -1,0 +1,20 @@
+﻿{
+  "name": "we are BASE coffee",
+  "short_name": "BASE coffee",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#2B2D9E",
+  "icons": [
+    {
+      "src": "/assets/base-logo2.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/base-logo2.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

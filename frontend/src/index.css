@@ -1,4 +1,5 @@
-@import 'tailwindcss';
+﻿@import 'tailwindcss';
+@config '../tailwind.config.ts';
 
 @source '../node_modules/rizzui/dist';
 
@@ -7,4 +8,76 @@
 :root {
   --background: oklch(100% 0 0);
   --foreground: oklch(20% 0 0);
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Golos Text', sans-serif;
+    background-color: #ffffff;
+    color: #1a1a1a;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* @deprecated: используйте <TileGridPattern /> или tile-grid.svg */
+.bg-tile-pattern {
+  background-color: #ffffff;
+  background-image: url('/assets/patterns/tile-grid.svg');
+  background-size: 40px 40px;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  width: max-content;
+  animation: marquee 20s linear infinite;
+}
+
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in-up 0.7s ease-out forwards;
+}
+
+.animate-fade-in-delayed {
+  animation: fade-in-up 0.9s ease-out forwards;
+}
+
+.rizzui-select-dropdown,
+.rizzui-popover,
+[role='listbox'] {
+  background: #ffffff !important;
+  opacity: 1 !important;
+  z-index: 80 !important;
 }
