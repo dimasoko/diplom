@@ -1,6 +1,6 @@
 ﻿import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { ActionIcon, Badge, Button, Drawer, Input } from 'rizzui'
 import { apiClient } from '../../api/client'
 import { useAuthStore } from '../../store/authStore'
@@ -57,6 +57,8 @@ function getBonusBalance(user: Record<string, unknown> | null) {
 
 export default function CartDrawer() {
   const location = useLocation()
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const user = useAuthStore((state) => state.user as Record<string, unknown> | null)
   const items = useCartStore((state) => state.items)
   const removeItem = useCartStore((state) => state.removeItem)
@@ -77,7 +79,15 @@ export default function CartDrawer() {
 
   const isHome = location.pathname === '/'
   const isMobile = typeof window !== 'undefined' ? window.matchMedia('(max-width: 1023px)').matches : false
-  const showFloatingCart = !(isHome && isMobile)
+  const showFloatingCart = !isMobile
+  const shouldOpenFromUrl = searchParams.get('cart') === '1'
+
+  useEffect(() => {
+    if (shouldOpenFromUrl) {
+      setIsOpen(true)
+      navigate(location.pathname, { replace: true })
+    }
+  }, [location.pathname, navigate, shouldOpenFromUrl])
 
   const subtotal = useMemo(() => items.reduce((sum, item) => sum + item.calculated_price, 0), [items])
 
@@ -163,8 +173,16 @@ export default function CartDrawer() {
 
       <Drawer isOpen={isOpen} onClose={() => setIsOpen(false)} placement="right">
         <div className="flex h-full flex-col bg-white">
-          <div className="border-b border-gray-200 p-5">
+          <div className="flex items-center justify-between border-b border-gray-200 p-5">
             <h2 className="font-display text-2xl text-primary">Корзина</h2>
+            <button
+              type="button"
+              onClick={() => setIsOpen(false)}
+              className="rounded-lg border border-primary px-3 py-1 text-sm text-primary transition-colors hover:bg-bg-surface"
+              aria-label="Вернуться назад"
+            >
+              ← Назад
+            </button>
           </div>
 
           <div className="flex-1 overflow-y-auto p-5">
@@ -238,3 +256,6 @@ export default function CartDrawer() {
     </>
   )
 }
+
+
+

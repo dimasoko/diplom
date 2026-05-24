@@ -2,28 +2,33 @@
 import { ActionIcon } from 'rizzui'
 import Header from './Header'
 import Footer from './Footer'
+import ScrollToTop from './ScrollToTop'
 import { useAuthStore } from '../../store/authStore'
 import CartDrawer from '../cart/CartDrawer'
 import { uiFlags } from '../../config/ui'
+import { extractRole } from '../../utils/role'
 
 export default function MainLayout() {
   const location = useLocation()
   const user = useAuthStore((state) => state.user)
   const accessToken = useAuthStore((state) => state.accessToken)
+  const role = extractRole(user as Record<string, unknown> | null)
+  const isAdmin = role === 'ADMIN' || role === 'STAFF'
   const isHome = location.pathname === '/'
   const isMobile = typeof window !== 'undefined' ? window.matchMedia('(max-width: 1023px)').matches : false
-  const isAuthorized = user !== null && typeof accessToken === 'string' && accessToken.length > 0
+  const isAuthorizedUser = !isAdmin && user !== null && typeof accessToken === 'string' && accessToken.length > 0
 
   return (
     <div className="min-h-screen bg-bg-base text-text-main">
+      <ScrollToTop />
       <Header />
-      <main className={isHome ? 'w-full pb-20 pt-0' : 'mx-auto w-full max-w-6xl px-4 pb-20 pt-28'}>
+      <main className={isHome ? 'w-full pb-20 pt-0' : 'mx-auto w-full max-w-6xl px-4 pb-20 pt-0'}>
         <Outlet />
       </main>
       <Footer />
-      {isAuthorized ? <CartDrawer /> : null}
+      {isAuthorizedUser ? <CartDrawer /> : null}
 
-      {user === null && uiFlags.guestMenuFabEnabled && !(isHome && isMobile) ? (
+      {user === null && uiFlags.guestMenuFabEnabled && !isMobile ? (
         <Link to="/menu" className="fixed bottom-6 right-6 z-40">
           <ActionIcon
             as="span"

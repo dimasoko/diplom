@@ -17,7 +17,7 @@ type ApiEnvelope<T> = {
 }
 
 type HomeBentoData = {
-  latest_published_event?: {
+  nearest_event?: {
     id?: string
     title?: string
     description?: string | null
@@ -93,16 +93,16 @@ export default function Home() {
   })
 
   const popularImage = data?.popular_item?.photo_url ?? data?.popular_item?.image_url ?? null
-  const latestEvent = data?.latest_published_event
-  const latestEventDate = formatEventDate(latestEvent?.event_date)
+  const nearestEvent = data?.nearest_event
+  const nearestEventDate = formatEventDate(nearestEvent?.event_date)
 
   const gallery = useMemo(() => galleryItems.slice(0, 8), [galleryItems])
 
   return (
-    <div className="space-y-6 pb-8 sm:space-y-8 sm:pb-10">
+    <div className="space-y-6 sm:space-y-8">
       <HeroSection />
 
-      <section className="opacity-0 animate-fade-in">
+      <section id="home-overview-section" className="opacity-0 animate-fade-in scroll-mt-24">
         <div className="grid grid-cols-1 gap-3 p-2 sm:gap-4 sm:p-4 md:grid-cols-3">
           <article className="rounded-3xl bg-bg-surface p-5 sm:p-6 md:col-span-2">
             <h2 className="mb-4 font-display text-2xl text-primary sm:text-3xl">О нас</h2>
@@ -141,8 +141,8 @@ export default function Home() {
             <p className="mb-4 text-sm text-text-main/80">
               {isLoading
                 ? 'Загрузка...'
-                : latestEvent?.title
-                  ? `${latestEvent.title}${latestEventDate ? ` · ${latestEventDate}` : ''}`
+                : nearestEvent?.title
+                  ? `${nearestEvent.title}${nearestEventDate ? ` · ${nearestEventDate}` : ''}`
                   : 'Анонс мероприятия скоро появится.'}
             </p>
             <Link
@@ -208,6 +208,12 @@ export default function Home() {
             loading="lazy"
           />
         </div>
+
+        <article id="contacts-section" className="rounded-3xl bg-bg-surface p-5 sm:p-6 scroll-mt-28">
+          <h3 className="mb-3 text-lg font-semibold text-text-main">Свяжитесь с нами</h3>
+          <p className="text-sm text-text-main/90 sm:text-base">Адрес: г. Барнаул, пр. Ленина, 58</p>
+          <p className="mt-1 text-sm text-text-main/90 sm:text-base">Телефон: +7(913)218-73-17</p>
+        </article>
       </section>
 
       <Modal isOpen={activeImage !== null} onClose={() => setActiveImage(null)} size="xl">

@@ -3,6 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { useScrollStore } from '../../store/useScrollStore'
 import AnimatedLogo from './AnimatedLogo'
+import { extractRole } from '../../utils/role'
 
 const linksBase = [
   { to: '/', label: 'Главная' },
@@ -14,6 +15,8 @@ const linksBase = [
 export default function Header() {
   const location = useLocation()
   const user = useAuthStore((state) => state.user)
+  const role = extractRole(user as Record<string, unknown> | null)
+  const isAdmin = role === 'ADMIN' || role === 'STAFF'
   const scrollProgress = useScrollStore((state) => state.scrollProgress)
   const scrollY = useScrollStore((state) => state.scrollY)
   const isHome = location.pathname === '/'
@@ -28,10 +31,11 @@ export default function Header() {
   const surfaceProgress = Math.min(Math.max((progress - 0.08) / 0.92, 0), 1)
   const centerGap = 124 - Math.round(dockProgress * 10)
 
-  const lastLink = user ? { to: '/profile', label: 'Профиль' } : { to: '/auth/login', label: 'Вход' }
+  const lastLink = user ? (isAdmin ? { to: '/admin', label: 'Админ-панель' } : { to: '/profile', label: 'Профиль' }) : { to: '/auth/login', label: 'Вход' }
   const leftLinks = linksBase.slice(0, 2)
   const rightLinks = [...linksBase.slice(2), lastLink]
-  const allMobileLinks = [...linksBase, lastLink]
+  const cartMobileLink = user && !isAdmin ? [{ to: `${location.pathname}?cart=1`, label: 'Корзина', isCart: true }] : []
+  const allMobileLinks = [...linksBase, ...cartMobileLink, lastLink]
 
   return (
     <>
@@ -93,7 +97,7 @@ export default function Header() {
       </header>
 
       <div className="fixed inset-x-0 bottom-0 z-[72] lg:hidden">
-        <div className="mx-2 mb-2 rounded-2xl border border-white/70 bg-white/95 shadow-sm backdrop-blur">
+        <div className={`mx-2 mb-2 rounded-2xl bg-white/95 shadow-sm backdrop-blur ${mobileOpen ? 'border border-primary/50' : 'border border-white/70'}`}>
           {mobileOpen ? (
             <nav className="grid gap-1 p-3">
               {allMobileLinks.map((link) => (
@@ -102,7 +106,9 @@ export default function Header() {
                   to={link.to}
                   onClick={() => setMobileOpen(false)}
                   className={({ isActive }) =>
-                    `rounded-xl px-3 py-2 text-sm ${isActive ? 'bg-primary text-white' : 'text-text-main hover:bg-bg-surface'}`
+                    link.label === 'Корзина'
+                      ? 'rounded-xl border border-primary px-3 py-2 text-sm text-primary transition-colors hover:bg-bg-surface'
+                      : `rounded-xl px-3 py-2 text-sm ${isActive ? 'bg-primary text-white' : 'text-text-main hover:bg-bg-surface'}`
                   }
                 >
                   {link.label}
@@ -124,3 +130,4 @@ export default function Header() {
     </>
   )
 }
+

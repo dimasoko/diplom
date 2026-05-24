@@ -1,21 +1,28 @@
-п»їimport { NavLink, Outlet } from 'react-router-dom'
-import Header from '../layout/Header'
-import Footer from '../layout/Footer'
+import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { Button } from 'rizzui'
+import { useAuthStore } from '../../store/authStore'
 
 const links = [
-  { to: '/admin', label: 'Р”Р°С€Р±РѕСЂРґ' },
-  { to: '/admin/orders', label: 'РћС‡РµСЂРµРґСЊ' },
-  { to: '/admin/menu', label: 'РњРµРЅСЋ' },
-  { to: '/admin/users', label: 'РљР»РёРµРЅС‚С‹' },
-  { to: '/admin/events', label: 'РњРµСЂРѕРїСЂРёСЏС‚РёСЏ' },
-  { to: '/admin/push', label: 'РџСѓС€-СѓРІРµРґРѕРјР»РµРЅРёСЏ' },
+  { to: '/admin', label: 'Дашборд' },
+  { to: '/admin/orders', label: 'Очередь' },
+  { to: '/admin/menu', label: 'Меню' },
+  { to: '/admin/users', label: 'Клиенты' },
+  { to: '/admin/events', label: 'Мероприятия' },
+  { to: '/admin/push', label: 'Пуш-уведомления' },
 ]
 
 export default function AdminLayout() {
+  const navigate = useNavigate()
+  const logout = useAuthStore((state) => state.logout)
+
+  const handleLogout = async () => {
+    await logout()
+    navigate('/auth/login', { replace: true })
+  }
+
   return (
     <div className="min-h-screen bg-bg-surface">
-      <Header />
-      <div className="pt-28 lg:grid lg:grid-cols-[260px_1fr]">
+      <div className="lg:grid lg:min-h-screen lg:grid-cols-[260px_1fr]">
         <aside className="bg-[#1A1A1A] px-5 py-6 text-white">
           <h1 className="mb-8 font-display text-3xl">we are BASE</h1>
 
@@ -35,13 +42,21 @@ export default function AdminLayout() {
               </NavLink>
             ))}
           </nav>
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleLogout}
+            className="mt-8 w-full border-white/40 text-white hover:bg-white/10"
+          >
+            Выйти
+          </Button>
         </aside>
 
         <main className="bg-bg-surface p-6">
           <Outlet />
         </main>
       </div>
-      <Footer />
     </div>
   )
 }

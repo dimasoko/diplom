@@ -231,6 +231,24 @@ export default function HeroSection() {
         </button>
       </div>
 
+      <div className="absolute inset-x-0 top-[92vw] z-[65] sm:hidden">
+        <img
+          src="/assets/hero-image.jpg"
+          alt="Интерьер we are BASE"
+          className="h-52 w-full object-cover"
+        />
+        <div className="mt-8 flex justify-center py-3">
+          <button
+            type="button"
+            onClick={() => scrollToSection('home-overview-section')}
+            className="animate-pulse rounded-full border border-primary bg-white/90 px-4 py-1 text-xs uppercase tracking-[0.08em] text-primary transition hover:bg-primary hover:text-white"
+            aria-label="Прокрутить вниз"
+          >
+            ↓ Листнуть вниз
+          </button>
+        </div>
+      </div>
+
       <div
         className="absolute bottom-[36%] left-1/2 z-[70] flex -translate-x-1/2 flex-col items-center gap-2 text-sm text-text-main/80"
         style={{

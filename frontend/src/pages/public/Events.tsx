@@ -104,6 +104,12 @@ export default function Events() {
                     {isExpanded ? 'Свернуть' : 'Развернуть'}
                   </Button>
                 ) : null}
+                <a
+                  href="/#contacts-section"
+                  className="pt-1 text-sm font-medium text-primary underline decoration-dashed underline-offset-4 transition-opacity hover:opacity-80"
+                >
+                  Запишитесь или задайте вопрос
+                </a>
                 {formatDate(event.publishedAt) ? (
                   <p className="mt-auto pt-3 text-right text-xs text-text-main/65">Опубликовано: {formatDate(event.publishedAt)}</p>
                 ) : null}

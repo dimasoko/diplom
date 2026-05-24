@@ -1,6 +1,8 @@
 import { Route, Routes } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 import MainLayout from './components/layout/MainLayout'
 import ProtectedRoute from './components/auth/ProtectedRoute'
+import ProfileAccessRedirect from './components/auth/ProfileAccessRedirect'
 import AdminLayout from './components/admin/AdminLayout'
 import { useAuthStore } from './store/authStore'
 import Home from './pages/public/Home'
@@ -18,19 +20,22 @@ import AdminMenu from './pages/admin/AdminMenu'
 import AdminUsers from './pages/admin/AdminUsers'
 import AdminEvents from './pages/admin/AdminEvents'
 import AdminPush from './pages/admin/AdminPush'
+import { extractRole } from './utils/role'
 
 export default function App() {
-  const user = useAuthStore((state) => state.user)
+  const user = useAuthStore((state) => state.user as Record<string, unknown> | null)
+  const role = extractRole(user)
+  const isAdmin = role === 'ADMIN' || role === 'STAFF'
 
   return (
     <Routes>
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
-        <Route path="/menu" element={user ? <AuthMenu /> : <Menu />} />
+        <Route path="/menu" element={user && !isAdmin ? <AuthMenu /> : <Menu />} />
         <Route path="/events" element={<Events />} />
         <Route path="/about" element={<About />} />
         <Route path="/privacy" element={<Privacy />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/profile" element={isAdmin ? <Navigate to="/admin" replace /> : user ? <Profile /> : <ProfileAccessRedirect />} />
       </Route>
       <Route element={<ProtectedRoute />}>
         <Route path="/admin" element={<AdminLayout />}>

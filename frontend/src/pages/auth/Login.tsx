@@ -9,6 +9,7 @@ import { useAuthStore } from '../../store/authStore'
 import Header from '../../components/layout/Header'
 import TileGridPattern from '../../components/layout/TileGridPattern'
 import Footer from '../../components/layout/Footer'
+import { extractRole } from '../../utils/role'
 
 type ApiEnvelope<T> = {
   success: boolean
@@ -64,7 +65,8 @@ export default function Login() {
       const payload = getAuthPayload(authData)
       if (!payload.accessToken) return
       setAuth(payload)
-      navigate('/profile')
+      const role = extractRole(payload.user as Record<string, unknown> | null)
+      navigate(role === 'ADMIN' || role === 'STAFF' ? '/admin' : '/profile')
     },
   })
 

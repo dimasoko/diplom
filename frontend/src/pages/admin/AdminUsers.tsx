@@ -12,6 +12,7 @@ type RawUser = {
   bonus_balance?: unknown
   orders_count?: unknown
   ltv?: unknown
+  role?: unknown
 }
 
 type UsersResponse = {
@@ -34,18 +35,23 @@ function normalizeUsers(payload: unknown): UserRow[] {
       ? (payload as UsersResponse).items ?? []
       : []
 
-  return source.map((item, index) => {
-    const user = item as RawUser
+  return source
+    .map((item, index) => {
+      const user = item as RawUser
+      const role = typeof user.role === 'string' ? user.role.toUpperCase() : ''
 
-    return {
-      id: toString(user.id, `user-${index}`),
-      phone: toString(user.phone, '-'),
-      name: toString(user.name, '-'),
-      bonusBalance: toNumber(user.bonus_balance, 0),
-      ordersCount: toNumber(user.orders_count, 0),
-      ltv: toNumber(user.ltv, 0),
-    }
-  })
+      return {
+        id: toString(user.id, `user-${index}`),
+        phone: toString(user.phone, '-'),
+        name: toString(user.name, '-'),
+        bonusBalance: toNumber(user.bonus_balance, 0),
+        ordersCount: toNumber(user.orders_count, 0),
+        ltv: toNumber(user.ltv, 0),
+        role,
+      }
+    })
+    .filter((user) => user.role === '' || user.role === 'CLIENT' || user.role === 'USER')
+    .map(({ role: _role, ...user }) => user)
 }
 
 export default function AdminUsers() {

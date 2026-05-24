@@ -1,5 +1,6 @@
 import { Prisma } from "../../generated/prisma/client";
 import { OrderStatus } from "../../generated/prisma/enums";
+import { UserRole } from "../../generated/prisma/enums";
 import { HttpError } from "../../errors/http-error";
 import { prisma } from "../../lib/prisma";
 import {
@@ -123,6 +124,7 @@ export const getUsers = async (query: UsersQueryInput) => {
 
   const where: Prisma.UserWhereInput = {
     deleted_at: null,
+    role: UserRole.CLIENT,
     ...(search
       ? {
           OR: [

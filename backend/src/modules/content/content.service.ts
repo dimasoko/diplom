@@ -33,26 +33,37 @@ const getRandomPopularItem = async () => {
   });
 };
 
-const getLatestPublishedEvent = async () => {
+const getNearestEvent = async () => {
+  const now = new Date();
+  const upcoming = await prisma.event.findFirst({
+    where: {
+      is_published: true,
+      event_date: { gte: now },
+    },
+    orderBy: [{ event_date: "asc" }, { published_at: "desc" }],
+  });
+
+  if (upcoming) {
+    return upcoming;
+  }
+
   return prisma.event.findFirst({
     where: {
       is_published: true,
     },
-    orderBy: {
-      published_at: "desc",
-    },
+    orderBy: [{ event_date: "desc" }, { published_at: "desc" }],
   });
 };
 
 export const getHomeBento = async () => {
-  const [popular_item, latest_published_event] = await Promise.all([
+  const [popular_item, nearest_event] = await Promise.all([
     getRandomPopularItem(),
-    getLatestPublishedEvent(),
+    getNearestEvent(),
   ]);
 
   return {
     popular_item,
-    latest_published_event,
+    nearest_event,
   };
 };
 

@@ -81,3 +81,7 @@
   opacity: 1 !important;
   z-index: 80 !important;
 }
+
+.rizzui-tooltip {
+  color: #ffffff !important;
+}
